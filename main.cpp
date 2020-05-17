@@ -5,12 +5,46 @@
 #define TARGET_FREQUENCY 941.0 //941 Hz
 #define N 205 //Block size
 #define PI 3.14159265358979
-float coeff;
-float Q1;
-float Q2;
+double coeff;
+double Q1;
+double Q2;
 double sine;
 double cosine;
 SAMPLE testData[N];
+
+double coeff_max;
+double Q0_max;
+double Q1_max;
+double Q2_max;
+
+void StoreMaxValues(double Q0)
+{
+    if (fabs(coeff)  > fabs(coeff_max))
+    {
+        coeff_max = coeff;
+    }
+    if (fabs(Q0)  > fabs(Q0_max))
+    {
+        Q0_max = Q0;
+    }
+    if (fabs(Q1)  > fabs(Q1_max))
+    {
+        Q1_max = Q1;
+    }
+    if (fabs(Q2)  > fabs(Q2_max))
+    {
+        Q2_max = Q2;
+    }
+}
+
+void PrintStoreMaxValues(void)
+{
+    printf("For coeff_max = %f,\n", coeff_max);
+    printf("For Q0_max = %f,\n", Q0_max);
+    printf("For Q1_max = %f,\n", Q1_max);
+    printf("For Q2_max = %f,\n", Q2_max);
+}
+
 /* Call this routine before every "block" (size=N) of samples. */
 void ResetGoertzel(void)
 {
@@ -38,10 +72,12 @@ void InitGoertzel(void)
 /* Call this routine for every sample. */
 void ProcessSample(SAMPLE sample)
 {
-    float Q0;
+    double Q0;
     Q0 = coeff * Q1 - Q2 + (double)sample;
     Q2 = Q1;
     Q1 = Q0;
+
+    StoreMaxValues(Q0);
 }
 
 /* Optimized Goertzel */
@@ -89,5 +125,6 @@ int main(void)
     GenerateAndTest(TARGET_FREQUENCY - 250);
     GenerateAndTest(TARGET_FREQUENCY);
     GenerateAndTest(TARGET_FREQUENCY + 250);
+    PrintStoreMaxValues();
     return 0;
 }
