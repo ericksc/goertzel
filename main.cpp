@@ -5,9 +5,9 @@
 #define TARGET_FREQUENCY 941.0 //941 Hz
 #define N 205 //Block size
 #define PI 3.14159265358979
-double coeff;
-double Q1;
-double Q2;
+float coeff;
+float Q1;
+float Q2;
 double sine;
 double cosine;
 SAMPLE testData[N];
@@ -38,7 +38,7 @@ void InitGoertzel(void)
 /* Call this routine for every sample. */
 void ProcessSample(SAMPLE sample)
 {
-    double Q0;
+    float Q0;
     Q0 = coeff * Q1 - Q2 + (double)sample;
     Q2 = Q1;
     Q1 = Q0;
