@@ -14,26 +14,29 @@ double cosine;
 SAMPLE testData[N];
 
 //Para definir punto fijo de 32 bits.
-int FIXED_POINT = 8;
-int ONE = 1 << FIXED_POINT;
+int FIXED_POINT_16 = 16;
+int ONE_16 = 1 << FIXED_POINT_16;
 
-int toFix( float val ) {
+int FIXED_POINT_30 = 30;
+int ONE_30 = 1 << FIXED_POINT_30;
+
+int toFix( float val, int ONE ) {
     // Escalamiento
     return (int) (val * ONE);
 }
 
-float floatVal( int fix ) {
+float floatVal( int fix, int ONE ) {
     return ((float) fix) / ONE;
 }
 
-int intVal( int fix ) {
+int intVal( int fix, int FIXED_POINT ) {
     return fix >> FIXED_POINT;
 }
 
-int mul(int a, int b) {
+int mul(int a, int b, int FIXED_POINT_mixed) {
     // Manejo de 64 bit para el resultado inmedianto de la multiplicación
     // Conversion a 32 bits para posterior uso
-    return (int) ((long)a * (long)b )>> FIXED_POINT;
+    return (int)((long long int)fix_coeff * (long long int)Q1 >> FIXED_POINT_mixed);
 }
 
 /* Call this routine before every "block" (size=N) of samples. */
@@ -54,7 +57,7 @@ void InitGoertzel(void)
     sine = sin(omega);
     cosine = cos(omega);
     coeff = 2.0 * cosine;
-    fix_coeff = toFix(coeff);
+    fix_coeff = toFix(coeff, ONE_30);
     printf("For SAMPLING_RATE = %f", SAMPLING_RATE);
     printf(" N = %d", N);
     printf(" and FREQUENCY = %f,\n", TARGET_FREQUENCY);
@@ -67,7 +70,7 @@ void ProcessSample(SAMPLE sample)
 {
     // Punto fijo 32. INT
     int Q0;
-    Q0 = mul(fix_coeff, Q1) - Q2 + toFix(sample);
+    Q0 = mul(fix_coeff, Q1, 30) - Q2 + toFix(sample, ONE_16);
     Q2 = Q1;
     Q1 = Q0;
 }
@@ -77,7 +80,7 @@ void ProcessSample(SAMPLE sample)
 float GetMagnitudeSquared(void)
 {
     float result;
-    result = floatVal(Q1) * floatVal(Q1) + floatVal(Q2) * floatVal(Q2) - floatVal(Q1) * floatVal(Q2) * coeff;
+    result = floatVal(Q1, ONE_16) * floatVal(Q1,ONE_16) + floatVal(Q2,ONE_16) * floatVal(Q2,ONE_16) - floatVal(Q1,ONE_16) * floatVal(Q2,ONE_16) * coeff;
     return result;
 }
 /*** End of Goertzel-specific code, the remainder is test code. */
